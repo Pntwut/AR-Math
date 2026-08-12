@@ -13,7 +13,7 @@ import { HandTracker } from "./hand-tracking.js";
   // ---------- CONFIG ----------
   const DEFAULT_ROUND_SECONDS = 45;
   const OPTIONS_COUNT = 4;
-  const DWELL_MS = 3000; // เวลาที่ต้องชี้ค้างไว้เพื่อยืนยันคำตอบ
+  const DWELL_MS = 1500; // เวลาที่ต้องชี้ค้างไว้เพื่อยืนยันคำตอบ
   const WRONG_LOCKOUT_MS = 700; // กันไม่ให้ตอบผิดซ้ำทันทีขณะยังชี้ค้างอยู่จุดเดิม
   const BUBBLE_COLORS = ["#ff4d7e", "#7b5cff", "#38e8b0", "#ff8b3d", "#3ba7ff", "#ffc93c"];
 
