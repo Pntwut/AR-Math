@@ -13,7 +13,7 @@ import { HandTracker } from "./hand-tracking.js";
   // ---------- CONFIG ----------
   const DEFAULT_ROUND_SECONDS = 45;
   const OPTIONS_COUNT = 4;
-  const DWELL_MS = 1500; // เวลาที่ต้องชี้ค้างไว้เพื่อยืนยันคำตอบ
+  const DWELL_MS = 3000; // เวลาที่ต้องชี้ค้างไว้เพื่อยืนยันคำตอบ
   const WRONG_LOCKOUT_MS = 700; // กันไม่ให้ตอบผิดซ้ำทันทีขณะยังชี้ค้างอยู่จุดเดิม
   const BUBBLE_COLORS = ["#ff4d7e", "#7b5cff", "#38e8b0", "#ff8b3d", "#3ba7ff", "#ffc93c"];
 
@@ -148,6 +148,12 @@ import { HandTracker } from "./hand-tracking.js";
   $("cameraToggleHud").addEventListener("click", toggleCamera);
 
   // ---------- FULLSCREEN ----------
+  const fullscreenSupported = !!(
+    document.documentElement.requestFullscreen ||
+    document.documentElement.webkitRequestFullscreen ||
+    document.documentElement.msRequestFullscreen
+  );
+
   function isFullscreen() {
     return !!(
       document.fullscreenElement ||
@@ -157,6 +163,13 @@ import { HandTracker } from "./hand-tracking.js";
   }
 
   async function toggleFullscreen() {
+    if (!fullscreenSupported) {
+      showFullscreenNote(
+        "เบราว์เซอร์นี้ไม่รองรับโหมดเต็มหน้าจอ (ข้อจำกัดของ iOS ที่อนุญาตเฉพาะ Safari) " +
+          "แนะนำให้เปิดหน้านี้ด้วย Safari แล้วกดปุ่มแชร์ → \"เพิ่มลงหน้าจอโฮม\" จะได้เต็มจอแบบไม่มีแถบเบราว์เซอร์เลยครับ"
+      );
+      return;
+    }
     const el = document.documentElement;
     try {
       if (!isFullscreen()) {
@@ -169,15 +182,26 @@ import { HandTracker } from "./hand-tracking.js";
         else if (document.msExitFullscreen) await document.msExitFullscreen();
       }
     } catch (e) {
-      // iPadOS Safari รุ่นเก่าบางรุ่นไม่รองรับ Fullscreen API เต็มรูปแบบ
-      console.warn("Fullscreen ไม่รองรับบนอุปกรณ์นี้:", e);
+      console.warn("Fullscreen ล้มเหลว:", e);
+      showFullscreenNote("เปิดเต็มหน้าจอไม่สำเร็จ ลองเปิดด้วย Safari แทนครับ");
     }
   }
 
+  function showFullscreenNote(text) {
+    const note = $("fullscreenNote");
+    note.textContent = text;
+    note.classList.remove("hidden");
+  }
+
   function updateFullscreenLabels() {
+    if (!fullscreenSupported) {
+      $("fullscreenBtn").textContent = "⛶ เต็มหน้าจอ (เบราว์เซอร์นี้ไม่รองรับ)";
+      return;
+    }
     const label = isFullscreen() ? "⛶ ออกจากเต็มหน้าจอ" : "⛶ เต็มหน้าจอ";
     $("fullscreenBtn").textContent = label;
   }
+  updateFullscreenLabels();
 
   $("fullscreenBtn").addEventListener("click", async () => {
     await toggleFullscreen();
