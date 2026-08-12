@@ -179,6 +179,25 @@ import { HandTracker } from "./hand-tracking.js";
     beginRound();
   });
 
+  $("homeBtnHud").addEventListener("click", goHome);
+  $("homeBtnEnd").addEventListener("click", goHome);
+
+  function goHome() {
+    roundActive = false;
+    clearInterval(timerHandle);
+    tracker.stop();
+    handCursor.style.display = "none";
+    clearHover();
+    bubbleLayer.innerHTML = "";
+
+    hud.classList.add("hidden");
+    questionBar.classList.add("hidden");
+    $("cameraToggleHud").classList.add("hidden");
+    endScreen.classList.add("hidden");
+
+    startScreen.classList.remove("hidden");
+  }
+
   function beginRound() {
     roundSeconds = readRoundSeconds();
     score = 0;
