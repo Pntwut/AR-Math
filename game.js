@@ -147,6 +147,48 @@ import { HandTracker } from "./hand-tracking.js";
   $("cameraToggleStart").addEventListener("click", toggleCamera);
   $("cameraToggleHud").addEventListener("click", toggleCamera);
 
+  // ---------- FULLSCREEN ----------
+  function isFullscreen() {
+    return !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement
+    );
+  }
+
+  async function toggleFullscreen() {
+    const el = document.documentElement;
+    try {
+      if (!isFullscreen()) {
+        if (el.requestFullscreen) await el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+        else if (el.msRequestFullscreen) await el.msRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) await document.msExitFullscreen();
+      }
+    } catch (e) {
+      // iPadOS Safari รุ่นเก่าบางรุ่นไม่รองรับ Fullscreen API เต็มรูปแบบ
+      console.warn("Fullscreen ไม่รองรับบนอุปกรณ์นี้:", e);
+    }
+  }
+
+  function updateFullscreenLabels() {
+    const label = isFullscreen() ? "⛶ ออกจากเต็มหน้าจอ" : "⛶ เต็มหน้าจอ";
+    $("fullscreenBtn").textContent = label;
+  }
+
+  $("fullscreenBtn").addEventListener("click", async () => {
+    await toggleFullscreen();
+    updateFullscreenLabels();
+  });
+  $("fullscreenBtnHud").addEventListener("click", toggleFullscreen);
+
+  ["fullscreenchange", "webkitfullscreenchange", "msfullscreenchange"].forEach((evt) => {
+    document.addEventListener(evt, updateFullscreenLabels);
+  });
+
   // ---------- GAME FLOW ----------
   startBtn.addEventListener("click", async () => {
     if (selectedTables.size === 0) {
@@ -161,6 +203,7 @@ import { HandTracker } from "./hand-tracking.js";
     hud.classList.remove("hidden");
     questionBar.classList.remove("hidden");
     $("cameraToggleHud").classList.remove("hidden");
+    $("fullscreenBtnHud").classList.remove("hidden");
 
     if (pointerMode === "hand") {
       tracker.start(onHandUpdate);
@@ -173,6 +216,7 @@ import { HandTracker } from "./hand-tracking.js";
     hud.classList.remove("hidden");
     questionBar.classList.remove("hidden");
     $("cameraToggleHud").classList.remove("hidden");
+    $("fullscreenBtnHud").classList.remove("hidden");
     if (pointerMode === "hand") {
       tracker.start(onHandUpdate);
     }
@@ -193,6 +237,7 @@ import { HandTracker } from "./hand-tracking.js";
     hud.classList.add("hidden");
     questionBar.classList.add("hidden");
     $("cameraToggleHud").classList.add("hidden");
+    $("fullscreenBtnHud").classList.add("hidden");
     endScreen.classList.add("hidden");
 
     startScreen.classList.remove("hidden");
@@ -236,6 +281,7 @@ import { HandTracker } from "./hand-tracking.js";
     hud.classList.add("hidden");
     questionBar.classList.add("hidden");
     $("cameraToggleHud").classList.add("hidden");
+    $("fullscreenBtnHud").classList.add("hidden");
     $("endScore").textContent = score;
     $("endMsg").textContent = pickEndMessage(score);
     endScreen.classList.remove("hidden");
