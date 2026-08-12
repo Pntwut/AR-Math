@@ -11,16 +11,17 @@ import { HandTracker } from "./hand-tracking.js";
   "use strict";
 
   // ---------- CONFIG ----------
-  const ROUND_SECONDS = 45;
+  const DEFAULT_ROUND_SECONDS = 45;
   const OPTIONS_COUNT = 4;
-  const DWELL_MS = 1500; // เวลาที่ต้องชี้ค้างไว้เพื่อยืนยันคำตอบ
+  const DWELL_MS = 3000; // เวลาที่ต้องชี้ค้างไว้เพื่อยืนยันคำตอบ
   const WRONG_LOCKOUT_MS = 700; // กันไม่ให้ตอบผิดซ้ำทันทีขณะยังชี้ค้างอยู่จุดเดิม
   const BUBBLE_COLORS = ["#ff4d7e", "#7b5cff", "#38e8b0", "#ff8b3d", "#3ba7ff", "#ffc93c"];
 
   // ---------- STATE ----------
   let selectedTables = new Set([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  let roundSeconds = DEFAULT_ROUND_SECONDS;
   let score = 0;
-  let timeLeft = ROUND_SECONDS;
+  let timeLeft = roundSeconds;
   let timerHandle = null;
   let currentAnswer = null;
   let roundActive = false;
@@ -50,6 +51,7 @@ import { HandTracker } from "./hand-tracking.js";
   const handCursor = $("handCursor");
   const handStatus = $("handStatus");
   const startBtn = $("startBtn");
+  const roundSecondsInput = $("roundSeconds");
 
   // ---------- BUILD TABLE PICKER ----------
   const tablePicker = $("tablePicker");
@@ -178,8 +180,9 @@ import { HandTracker } from "./hand-tracking.js";
   });
 
   function beginRound() {
+    roundSeconds = readRoundSeconds();
     score = 0;
-    timeLeft = ROUND_SECONDS;
+    timeLeft = roundSeconds;
     scoreVal.textContent = score;
     timeVal.textContent = timeLeft;
     timerPill.classList.remove("low");
@@ -194,6 +197,14 @@ import { HandTracker } from "./hand-tracking.js";
         endRound();
       }
     }, 1000);
+  }
+
+  function readRoundSeconds() {
+    let v = parseInt(roundSecondsInput.value, 10);
+    if (isNaN(v)) v = DEFAULT_ROUND_SECONDS;
+    v = Math.max(10, Math.min(300, v)); // กันตั้งค่าเพี้ยน: อย่างน้อย 10 วิ ไม่เกิน 300 วิ
+    roundSecondsInput.value = v;
+    return v;
   }
 
   function endRound() {
